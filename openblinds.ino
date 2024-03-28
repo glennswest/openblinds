@@ -13,57 +13,52 @@
 #include <ESPAsyncTCP.h>
 #endif
 #include <ESPAsyncWebServer.h>
-
+#include "SPIFFS.h"
 #include <Preferences.h>
+#include "globals.h"
 
 // prototypes
 boolean connectWifi();
+AsyncWebServer myserver(80);
 
-Preferences preferences;
+String ssid;
+String pass;
+String ip;
+String gateway;
+uint wifi_state;
+
+
+IPAddress localIP;
+//IPAddress localIP(192, 168, 1, 200); // hardcoded
+
+// Set your Gateway IP address
+IPAddress localGateway;
+//IPAddress localGateway(192, 168, 1, 1); //hardcoded
+IPAddress subnet(255, 255, 0, 0);
+
 
 //callback functions
 void firstLightChanged(uint8_t brightness);
 
-// Change this!!
-const char* ssid = "gswlair";
-const char* password = "0419196200";
+void setup_wifi_manager();
 
 boolean wifiConnected = false;
 
 Espalexa espalexa;
-AsyncWebServer server(80);
 
 
-void setup()
+void setup_Application()
 {
-  Serial.begin(115200);
-  // Initialise wifi connection
-  
-  preferences.begin("openblinds", false); 
-  unsigned int PrefStatus = preferences.getUInt("PrefStatus", 0);
-  if (PrefStatus == 0){
-    Serial.println("Warning: No Preferences");
-    preferences.clear();
-    PrefStatus = 1;
-    
-    preferences.putUInt("PrefStatus", PrefStatus);
-    preferences.putString("wifi_ssid", "");
-    preferences.putString("wifi_key","");
-    preferences.putUInt("wifi_state", 1);
-    preferences.end();
-    } else {
-      Serial.println("Preferences Set");
-    }
-  wifiConnected = connectWifi();
+wifiConnected = connectWifi();
   
   if(wifiConnected){
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    myserver.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(200, "text/plain", "This is an example index page your server may send.");
     });
-    server.on("/test", HTTP_GET, [](AsyncWebServerRequest *request){
+    myserver.on("/test", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(200, "text/plain", "This is a second subpage you may have.");
     });
-    server.onNotFound([](AsyncWebServerRequest *request){
+    myserver.onNotFound([](AsyncWebServerRequest *request){
       if (!espalexa.handleAlexaApiCall(request)) //if you don't know the URI, ask espalexa whether it is an Alexa control request
       {
         //whatever you want to do with 404s
@@ -74,7 +69,7 @@ void setup()
     // Define your devices here.
     espalexa.addDevice("My Light 1", firstLightChanged); //simplest definition, default state off
 
-    espalexa.begin(&server); //give espalexa a pointer to your server object so it can use your server instead of creating its own
+    espalexa.begin(&myserver); //give espalexa a pointer to your server object so it can use your server instead of creating its own
     //server.begin(); //omit this since it will be done by espalexa.begin(&server)
   } else
   {
@@ -110,13 +105,22 @@ void firstLightChanged(uint8_t brightness) {
     }
 }
 
+
+
+void setup()
+{
+  Serial.begin(115200);
+  // Initialise wifi connection
+  setup_wifi_manager();
+}
+   
 // connect to wifi – returns true if successful or false if not
 boolean connectWifi(){
   boolean state = true;
   int i = 0;
   
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
+  WiFi.begin(ssid, pass);
   Serial.println("");
   Serial.println("Connecting to WiFi");
 
@@ -143,3 +147,4 @@ boolean connectWifi(){
   delay(100);
   return state;
 }
+
