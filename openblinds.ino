@@ -14,8 +14,12 @@
 #endif
 #include <ESPAsyncWebServer.h>
 
+#include <Preferences.h>
+
 // prototypes
 boolean connectWifi();
+
+Preferences preferences;
 
 //callback functions
 void firstLightChanged(uint8_t brightness);
@@ -34,6 +38,22 @@ void setup()
 {
   Serial.begin(115200);
   // Initialise wifi connection
+  
+  preferences.begin("openblinds", false); 
+  unsigned int PrefStatus = preferences.getUInt("PrefStatus", 0);
+  if (PrefStatus == 0){
+    Serial.println("Warning: No Preferences");
+    preferences.clear();
+    PrefStatus = 1;
+    
+    preferences.putUInt("PrefStatus", PrefStatus);
+    preferences.putString("wifi_ssid", "");
+    preferences.putString("wifi_key","");
+    preferences.putUInt("wifi_state", 1);
+    preferences.end();
+    } else {
+      Serial.println("Preferences Set");
+    }
   wifiConnected = connectWifi();
   
   if(wifiConnected){
