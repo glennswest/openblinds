@@ -83,7 +83,7 @@ wifiConnected = connectWifi();
  
 void loop()
 {
-   espalexa.loop();
+   //espalexa.loop();
    delay(1);
 }
 
@@ -111,6 +111,9 @@ void setup()
 {
   Serial.begin(115200);
   // Initialise wifi connection
+  Serial.println("Booting");
+  Serial.flush();
+  delay(1);
   setup_wifi_manager();
 }
    

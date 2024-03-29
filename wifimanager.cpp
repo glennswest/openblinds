@@ -33,10 +33,17 @@ void setup_wifi_manager()
 {
 
   Serial.println("WifiManager: Starting Up\n");
+  Serial.flush();
+  Serial.println("wifimanager: initSPIFFS in progress");
+  Serial.flush();
   initSPIFFS();
+  Serial.println("wifimanager: Preferences being configured");
+  Serial.flush();
   preferences.begin("wifimanager", false); 
   unsigned int PrefStatus = preferences.getUInt("PrefStatus", 0);
-  
+  Serial.print("wifimanager: Preference State: ");
+  Serial.println(PrefStatus);
+  Serial.flush();
   if (PrefStatus < PVERSION){
     Serial.println("Warning: Preferences Updated");
     preferences.clear();
@@ -69,6 +76,7 @@ void setup_wifi_manager()
            setup_SoftAP();
            break;
       case 2:
+           Serial.println("WifiManager: Starting application");
            setup_Application();     
     }          
 
@@ -76,16 +84,31 @@ void setup_wifi_manager()
 
 void setup_SoftAP()
 {
+String macaddress;
+char APname[32];
+
 // Connect to Wi-Fi network with SSID and password
     Serial.println("Setting AP (Access Point)");
     // NULL sets an open Access Point
-    WiFi.softAP("OpenBlinds Wifi Manager", NULL);
+   // macaddress = WiFi.macAddress();
+   // Serial.print("Mac Address: ");
+   // Serial.println(macaddress);
+
+    //snprintf(APname, 32, "blinds-%llX", ESP.getEfuseMac());
+    //snprintf(APname,24,"blinds");
+    //Serial.print("AP Name ");
+    //Serial.println(APname);
+    //WiFi.softAP(APname, NULL);
+    WiFi.softAP("blinds",NULL);
 
     IPAddress IP = WiFi.softAPIP();
     Serial.print("AP IP address: ");
     Serial.println(IP); 
+    Serial.println("Waiting on User to configure me");
+      
  // Web Server Root URL
     manserver.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+      Serial.println("Request slash");
       request->send(SPIFFS, "/wifimanager.html", "text/html");
        });
     
@@ -131,10 +154,10 @@ void setup_SoftAP()
           //Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
         }
       }
-    preferences.end();
+    //preferences.end();
     request->send(200, "text/plain", "Done. ESP will restart, connect to your router and go to IP address: " + ip);
       delay(3000);
-      ESP.restart();
+      //ESP.restart();
     });
     manserver.begin();
   
@@ -142,10 +165,15 @@ void setup_SoftAP()
 
 // Initialize SPIFFS
 void initSPIFFS() {
+  
   if (!SPIFFS.begin(true)) {
     Serial.println("An error has occurred while mounting SPIFFS");
   }
-  Serial.println("SPIFFS mounted successfully");
+  if (SPIFFS.exists("/wifimanager.html")){
+      Serial.println("SPIFFS mounted successfully");
+   } else {
+      Serial.println("SPIFFS: No FILES available!");
+   }
 }
 
 // Read File from SPIFFS
