@@ -1,3 +1,3 @@
-./bin/mkspiffs -c data spiffs.bin
-esptool.py --chip esp32c3 --port /dev/cu.usbmodem1101 --baud 921600 write_flash 0x3D0000 spiffs.bin -u -e 
+./bin/mklittlefs -s 194560 -c data littlefs.bin
+esptool.py --chip esp32c3 --port /dev/cu.usbmodem101 --baud 921600 write_flash 0x290000 littlefs.bin -u  
 
