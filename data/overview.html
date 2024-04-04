@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Hugo 0.88.1">
+    <title>Overview</title>
+
+    <link rel="canonical" href="https://getbootstrap.com/docs/5.1/examples/sidebars/">
+
+
+
+    <!-- Bootstrap core CSS -->
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <link href="tabulator.min.css" rel="stylesheet">
+    <script type="text/javascript" src="tabulator.min.js"></script>
+
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+
+        .tabulator {
+            display: table !important;
+        }
+
+        .tabulator .tabulator-header {
+            border-bottom: 1px solid rgb(201, 200, 200);
+        }
+
+        .tabulator .tabulator-header .tabulator-col.tabulator-sortable .tabulator-col-title {
+
+            color: black;
+        }
+
+        .tabulator .tabulator-header .tabulator-col.tabulator-sortable[aria-sort=none] .tabulator-col-content .tabulator-col-sorter {
+            color: #000;
+        }
+    </style>
+
+</head>
+
+<body>
+
+
+    <div id="SystemSettings"></div>
+
+
+    <script src="bootstrap.bundle.min.js"></script>
+
+
+    <script type="text/javascript">
+        var table = new Tabulator("#SystemSettings", {
+            autoResize: false,
+            height: 220,
+            ajaxURL: "data/systemsetting.json",
+            columns: [
+                { title: "Name", field: "name", width: 150 },
+                { title: "Value", field: "val", editor: "input", width: 150 }
+            ],
+        });
+        table.on('cellEdited', function (cell) {
+            // This callback is called any time a cell is edited.
+            var xdata = cell.getData();
+            ajaxConfig: "POST"
+            var ajaxConfig = {
+                method: "post" //set request type to Position
+            };
+            table.setData("data/systemsetting.json?update", xdata, ajaxConfig);
+        });
+    </script>
+</body>
+
+</html>
